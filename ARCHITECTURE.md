@@ -1,4 +1,4 @@
-# Mini Hotel Therapy Booking System - Backend Architecture (MongoDB)
+# Mini Hotel Therapy Booking System - Backend Architecture
 
 ## 1. Overview
 
@@ -86,7 +86,10 @@ The project follows a feature-based directory structure. **Auth and User managem
 
 We will use Mongoose to define schemas for our MongoDB collections. Data relationships will be managed using `ObjectId` references.
 
-### `users` collection ✅ EXISTS (needs enhancement)
+### `users` collection ✅ EXISTS (needs updates)
+
+**Current state:** Has email, name, picture, role (default: "user"), googleId, lastLoggedIn  
+**Changes needed:**
 
 ```javascript
 const userSchema = new Schema(
@@ -94,9 +97,9 @@ const userSchema = new Schema(
     email: { type: String, required: true, unique: true },
     name: { type: String },
     picture: { type: String },
-    role: { type: String, enum: ["CUSTOMER", "ADMIN"], default: "CUSTOMER" }, // UPDATE NEEDED
+    role: { type: String, enum: ["customer", "admin"], default: "customer" }, // UPDATE: Change from LMS roles (student/owner/instructor)
     googleId: { type: String, unique: true, sparse: true },
-    contact: { type: String }, // ADD THIS
+    contact: { type: String }, // ADD THIS FIELD
     lastLoggedIn: { type: Date },
   },
   { timestamps: true }
@@ -220,26 +223,29 @@ The API will expose the following endpoints, organized by routes.
 
 - `POST /register` - Register a new customer
 - `POST /login` - Login for any user
-- `POST /google` - Google OAuth login
-- `POST /logout` - Logout user
 
-### Customer Panel (`/api/me`) - Protected (Customer Role)
+* `POST /google` - Google OAuth login
+* `POST /logout` - Logout user
 
-- `GET /profile` - View own profile
-- `PUT /profile` - Update own profile
-- `GET /bookings` - Get personal bookings
+### Customer Panel (`/api/users/me`) ✅ MOSTLY IMPLEMENTED
+
+- `GET /me` - View own profile ✅ EXISTS
+- `PUT /:id` - Update own profile ✅ EXISTS (with ownDataMiddleware)
+- `GET /me/bookings` - Get personal bookings (TO IMPLEMENT)
   - Query params: `?filter=today|upcoming|past`
 
-### Admin Panel (`/api/admin`) - Protected (Admin Role)
+### Admin Panel - Protected (Admin Role)
 
-#### User Management (`/api/admin/users`)
+#### User Management (`/api/users`) ✅ ALREADY IMPLEMENTED
 
-- `GET /` - Get all customers (with search & pagination)
-  - Query params: `?search=term&page=1&limit=10`
-- `GET /:id` - Get single user
-- `DELETE /:id` - Delete a customer
+- `GET /` - Get all customers ✅ EXISTS (with search & pagination)
+  - Query params: `?page=1&limit=10&searchKeyword=term&searchBy=role|name`
+- `GET /:id` - Get single user ✅ EXISTS
+- `PUT /:id` - Update user ✅ EXISTS
+- `DELETE /:id` - Delete a customer ✅ EXISTS
+- `PUT /:id/role` - Change user role ✅ EXISTS
 
-#### Therapy Management (`/api/admin/therapies`)
+#### Therapy Management (`/api/therapies`)
 
 - `POST /` - Create therapy
 - `GET /` - Get all therapies (with search & pagination)
@@ -247,7 +253,7 @@ The API will expose the following endpoints, organized by routes.
 - `PUT /:id` - Update therapy
 - `DELETE /:id` - Delete therapy
 
-#### Therapist Management (`/api/admin/therapists`)
+#### Therapist Management (`/api/therapists`)
 
 - `POST /` - Create therapist
 - `GET /` - Get all therapists (with search & pagination)
@@ -255,7 +261,7 @@ The API will expose the following endpoints, organized by routes.
 - `PUT /:id` - Update therapist
 - `DELETE /:id` - Delete therapist
 
-#### Room Management (`/api/admin/rooms`)
+#### Room Management (`/api/rooms`)
 
 - `POST /` - Create room
 - `GET /` - Get all rooms (with status)
@@ -263,7 +269,7 @@ The API will expose the following endpoints, organized by routes.
 - `PUT /:id` - Update room
 - `DELETE /:id` - Delete room
 
-#### Booking Management (`/api/admin/bookings`)
+#### Booking Management (`/api/bookings`)
 
 - `POST /` - Create/assign therapy session
 - `GET /` - Get all bookings (with filters)
@@ -272,7 +278,7 @@ The API will expose the following endpoints, organized by routes.
 - `PUT /:id` - Update/reschedule booking
 - `DELETE /:id` - Cancel booking
 
-#### Dashboard (`/api/admin/dashboard`)
+#### Dashboard (`/api/dashboard`)
 
 - `GET /stats` - Get system statistics
   - Returns: total customers, total therapies, today's active sessions
@@ -288,36 +294,50 @@ The API will expose the following endpoints, organized by routes.
 
 ## 8. Implementation Checklist
 
-### Phase 1: Core Models & Services (Priority)
+### Phase 0: Update Existing Code (LMS → Therapy System) 🔴 CRITICAL FIRST
 
-- [ ] Update `User.model.ts` - Add `contact` field, change roles to CUSTOMER/ADMIN
-- [ ] Update `user.roles.ts` - Change to CUSTOMER/ADMIN constants
-- [ ] Create `Therapy.model.ts`
-- [ ] Create `Therapist.model.ts`
-- [ ] Create `Room.model.ts`
-- [ ] Create `Booking.model.ts` (with indexes)
-- [ ] Create `therapies.service.ts` (CRUD operations)
-- [ ] Create `therapists.service.ts` (CRUD operations)
-- [ ] Create `rooms.service.ts` (CRUD operations)
-- [ ] Create `bookings.service.ts` (with conflict check logic)
+**These MUST be updated first to convert from LMS to Therapy Booking System:**
+
+- [ ] Update `user.roles.ts` - Change from `student/admin/owner/instructor` to `customer/admin`
+- [ ] Update `User.model.ts` - Add `contact` field, update role enum to `['customer', 'admin']`, change default from `'user'` to `'customer'`
+- [ ] Update `google.auth.service.ts` - Change first user assignment from `UserRole.OWNER` to `UserRole.ADMIN`, new users from `UserRole.STUDENT` to `UserRole.CUSTOMER`
+- [ ] Update `users.service.ts` - Update role validation to use `customer/admin` only
+- [ ] Update `users.routes.ts` - Change role guards from `UserRole.OWNER, UserRole.ADMIN` to just `UserRole.ADMIN`
+- [ ] Update `auth.middleware.ts` - Verify role checks work with new role names
+- [ ] Test existing user endpoints after role changes (`GET /users/me`, `GET /users`, etc.)
+
+### Phase 1: Core Models & Services
+
+- [ ] Create `Therapy.model.ts` - name, description, duration, price
+- [ ] Create `Therapist.model.ts` - name, specialization, email, contact
+- [ ] Create `Room.model.ts` - roomNumber, capacity
+- [ ] Create `Booking.model.ts` - with indexes for conflict checking (therapistId, roomId, startTime, endTime)
+- [ ] Create `therapies.service.ts` - CRUD operations with pagination
+- [ ] Create `therapists.service.ts` - CRUD operations with pagination
+- [ ] Create `rooms.service.ts` - CRUD operations with availability status
+- [ ] Create `bookings.service.ts` - with conflict check logic (overlapping time slots)
 
 ### Phase 2: Controllers & Routes
 
-- [ ] Create `therapies.controller.ts` & `therapies.routes.ts`
-- [ ] Create `therapists.controller.ts` & `therapists.routes.ts`
-- [ ] Create `rooms.controller.ts` & `rooms.routes.ts`
-- [ ] Create `bookings.controller.ts` & `bookings.routes.ts`
-- [ ] Update `users.controller.ts` - Add profile endpoints for customers
+- [ ] Create `therapies.controller.ts` & `therapies.routes.ts` - Admin CRUD endpoints
+- [ ] Create `therapists.controller.ts` & `therapists.routes.ts` - Admin CRUD endpoints
+- [ ] Create `rooms.controller.ts` & `rooms.routes.ts` - Admin CRUD endpoints
+- [ ] Create `bookings.controller.ts` & `bookings.routes.ts` - Admin booking management
+- [ ] Add `GET /users/me/bookings` to `users.controller.ts` - Customer view their bookings
+- [ ] Register all new routes in `index.ts`
 
 ### Phase 3: Notifications & Scheduler
 
-- [ ] Create `email.service.ts` (using Nodemailer)
-- [ ] Create `scheduler.service.ts` (using node-cron for reminders)
-- [ ] Set up email templates (booking confirmation, cancellation, reminder)
+- [ ] Create `email.service.ts` - Using Nodemailer with SendGrid/Resend
+- [ ] Create `scheduler.service.ts` - Using node-cron for 24-hour reminders
+- [ ] Create email templates (booking confirmation, cancellation, reminder)
+- [ ] Integrate email sending in booking creation/cancellation
+- [ ] Test reminder scheduler (find bookings 24h away, send email, mark reminderSent)
 
 ### Phase 4: Testing & Refinement
 
-- [ ] Test conflict checking logic
-- [ ] Test email notifications
-- [ ] Test automated reminders
-- [ ] Add pagination helper if needed
+- [ ] Test conflict checking logic (therapist/room overlapping time slots)
+- [ ] Test email notifications (confirmation, cancellation, reminders)
+- [ ] Test automated reminders with cron job
+- [ ] Verify all role-based access controls (customer can only see own bookings, admin can manage all)
+- [ ] Test pagination and search on all endpoints
