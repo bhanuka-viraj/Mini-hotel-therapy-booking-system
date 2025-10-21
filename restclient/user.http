@@ -1,0 +1,34 @@
+# User REST Client
+
+@user_id = 68e666a167a75d7ea790377c
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU2NjZhMTY3YTc1ZDdlYTc5MDM3N2MiLCJpYXQiOjE3NjAwMDI3OTV9.rZtDxtg5ZwQzydWcL9_0dlf1v_ql3XhIDdgsxXsjo-w
+@base_url = localhost:8081
+###
+GET http://{{base_url}}/api/v1/users/me
+Authorization: Bearer {{access_token}}
+###
+GET http://{{base_url}}/api/v1/users/{{user_id}}
+Authorization: Bearer {{access_token}}
+###
+GET http://{{base_url}}/api/v1/users?page=1&limit=10&searchKeyword=owner&searchBy=role
+Authorization: Bearer {{access_token}}
+###
+PUT http://{{base_url}}/api/v1/users/{{user_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+	"name": "New Name",
+	"picture": "https://lh3.googleusercontent.com/a-/AOh14Gh..."
+}
+###
+PUT http://{{base_url}}/api/v1/users/{{user_id}}/role
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "role": "admin"
+}
+###
+DELETE http://{{base_url}}/api/v1/users/{{user_id}}
+Authorization: Bearer {{access_token}}

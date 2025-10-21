@@ -1,0 +1,188 @@
+﻿🏨 Mini Hotel Therapy Booking System – Full Feature List (Updated)
+👥 User Roles
+* Customer
+
+* Admin
+
+________________
+
+
+👤 Customer Panel
+🔐 Authentication
+   * Register and login with validation
+
+   * Redirect to Customer Dashboard after login
+
+   * Logout function
+
+________________
+
+
+🏠 Dashboard
+      * Sidebar with:
+
+         * Dashboard (view bookings)
+
+         * Profile
+
+________________
+
+
+👤 Profile Management
+            * View & update profile details (name, email, contact, etc.)
+
+________________
+
+
+💆‍♂️ Therapy Bookings
+               * View today’s therapies
+
+               * View upcoming therapies
+
+               * View past bookings (Booking History)
+
+               * View therapy details (name, therapist, date, time, room)
+
+________________
+
+
+🔔 Notifications
+                  * Email notifications for:
+
+                     * Booking confirmation
+
+                     * Booking cancellation
+
+                     * Booking updates/rescheduling
+
+                     * Reminder email sent 1 day before therapy session
+
+________________
+________________
+
+
+🧑‍⚕️ Admin Panel
+👥 User Management
+                        * View all customers
+
+                        * Delete customers
+
+                        * Search and pagination in user list
+
+________________
+
+
+💆 Therapy Management
+                           * Add, update, delete therapies
+
+                           * View therapy list with search and pagination
+
+________________
+
+
+🧑‍⚕️ Therapist Management
+                              * Add, update, delete therapists
+
+                              * View therapist details (name, specialization, available hours)
+
+                              * Search and pagination support
+
+________________
+
+
+🚪 Room Management
+                                 * Manage static room numbers (hardcoded in system)
+
+                                 * Display room status (available / occupied)
+
+________________
+
+
+📅 Therapy Assignment
+                                    * Assign therapy to a user
+
+                                    * Select therapist, room, start time, end time, and date
+
+                                    * System checks therapist and room availability
+
+                                    * Prevent time conflicts
+
+________________
+
+
+📆 Therapy Calendar & Filtering
+                                       * View therapy sessions in calendar view
+
+                                       * Filter by:
+
+                                          * Therapy name
+
+                                          * Therapist
+
+                                          * Room
+
+                                          * Date
+
+                                             * View specific therapist’s or room’s calendar to see occupied/free slots
+
+                                             * Edit or cancel therapy sessions directly from calendar
+
+________________
+
+
+📊 Dashboard Analytics
+                                                * Show real-time system stats:
+
+                                                   * Total Customers
+
+                                                   * Total Therapies
+
+                                                   * Today’s Active Sessions
+
+
+________________
+
+
+💬 System Notifications
+                                                      * Automated email notifications:
+
+                                                         * Booking confirmed
+
+                                                         * Booking cancelled
+
+                                                         * Therapy rescheduled
+
+                                                         * 1-day reminder email before therapy session
+
+                                                            * Sent to both user and therapist (optional)
+
+________________
+________________
+
+
+⚙️ Backend Features
+                                                               * Role-based access (Admin / Customer)
+
+                                                               * Centralized validation & error handling
+
+                                                               * Email notification service (e.g., Nodemailer, Resend, or SendGrid)
+
+                                                               * Availability checking for therapist & room
+
+                                                               * Search + filtering APIs for therapies, users, therapists
+
+                                                               * Logging system (Winston / Morgan)
+
+________________
+
+
+🎨 Frontend (Suggested Stack)
+                                                                  * Next js
+                                                                  * Tailwind CSS + Shadcn/UI
+                                                                  * React Query + Zustand or Redux Toolkit
+                                                                  * FullCalendar / React Big Calendar for therapy & therapist schedule views
+
+
+🎨 Backend (Suggested Stack)
+                                                                  * Node js
+                                                                  * Jwt auth
